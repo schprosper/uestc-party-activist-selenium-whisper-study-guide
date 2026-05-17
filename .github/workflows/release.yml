@@ -16,6 +16,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Validate repository contents
+        shell: pwsh
+        run: |
+          $srtCount = (Get-ChildItem -Path ".\srt" -Recurse -File -Filter "*.srt").Count
+          if ($srtCount -ne 131) {
+            throw "Expected 131 SRT files, found $srtCount."
+          }
+
       - name: Build release zips
         shell: pwsh
         run: |
@@ -23,12 +31,7 @@ jobs:
           $lightZip = "dxpx-light-study-srt-$version.zip"
           $srtZip = "srt-only-$version.zip"
 
-          $srtCount = (Get-ChildItem -Recurse -File .\srt -Filter *.srt).Count
-          if ($srtCount -ne 131) {
-            throw "Expected 131 SRT files, found $srtCount."
-          }
-
-          git archive --format=zip --output=$lightZip HEAD -- .gitattributes .gitignore README.md go.ps1 "开始使用.bat" setup.ps1 config.example.ps1 scripts vendor srt assets docs
+          git archive --format=zip --output=$lightZip HEAD
           if ($LASTEXITCODE -ne 0) {
             throw "git archive failed for $lightZip."
           }
@@ -37,6 +40,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw "git archive failed for $srtZip."
           }
+
+      - name: Inspect release zips
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME
+          $lightZip = "dxpx-light-study-srt-$version.zip"
+          $srtZip = "srt-only-$version.zip"
 
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           foreach ($zipPath in @($lightZip, $srtZip)) {
