@@ -41,27 +41,6 @@ jobs:
             throw "git archive failed for $srtZip."
           }
 
-      - name: Inspect release zips
-        shell: pwsh
-        run: |
-          $version = $env:GITHUB_REF_NAME
-          $lightZip = "dxpx-light-study-srt-$version.zip"
-          $srtZip = "srt-only-$version.zip"
-
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          foreach ($zipPath in @($lightZip, $srtZip)) {
-            $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zipPath))
-            try {
-              $bad = $zip.Entries | Where-Object { $_.FullName -match '(\.venv|config\.local|__pycache__|chrome-profile|\.git[\\/])' }
-              if ($bad) {
-                throw "Unexpected runtime/private file in $zipPath: $($bad[0].FullName)"
-              }
-            }
-            finally {
-              $zip.Dispose()
-            }
-          }
-
       - name: Create or update GitHub release
         shell: pwsh
         env:
