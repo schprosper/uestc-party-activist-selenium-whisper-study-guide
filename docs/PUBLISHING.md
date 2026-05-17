@@ -51,7 +51,9 @@ Compress-Archive -Path .\README.md,.\go.ps1,.\开始使用.bat,.\setup.ps1,.\con
 Compress-Archive -Path .\srt -DestinationPath ".\dist\$srtOnly.zip" -Force
 ```
 
-如果本机有 GitHub CLI：
+仓库带有 `.github/workflows/release.yml`。正常情况下，推送 `v*` tag 后 GitHub Actions 会自动生成并上传这两个 zip。
+
+如果本机有 GitHub CLI，也可以手动创建：
 
 ```powershell
 git tag v0.2.0
