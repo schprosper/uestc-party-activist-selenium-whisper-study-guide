@@ -1,0 +1,53 @@
+# Local runtime state
+.venv/
+.tmp/
+output/
+logs/
+debug/
+
+# Browser profiles contain login cookies and must never be published.
+chrome-profile/
+chrome-download-profile/
+chrome-transcribe-profile*/
+**/Default/
+**/Cookies
+**/Network/
+
+# Local configuration may contain private paths.
+config.local.ps1
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Logs and runtime manifests
+*.log
+manifest.jsonl
+failed_tasks.log
+transcribe.log
+meta.json
+笔记.md
+
+# Media and intermediate transcription outputs
+*.mp4
+*.mkv
+*.webm
+*.wav
+*.m4a
+*.mp3
+*.ass
+*.vtt
+*.json
+*.txt
+!scripts/requirements.txt
+
+# Keep the curated final subtitles in this repository.
+*.srt
+!srt/**/*.srt
+
+# Screenshots/debug artifacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp

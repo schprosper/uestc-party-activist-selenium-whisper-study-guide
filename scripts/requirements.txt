@@ -1,0 +1,3 @@
+# Python dependencies for Selenium automation.
+# Transcription tools such as video2md, ffmpeg, yt-dlp and Whisper are configured separately.
+selenium>=4.20,<5
