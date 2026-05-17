@@ -57,8 +57,13 @@ jobs:
           - $srtZip: only the final curated SRT files.
           "@
 
-          gh release view $version *> $null
-          if ($LASTEXITCODE -eq 0) {
+          $releaseList = gh release list --limit 100 --json tagName
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not list GitHub releases."
+          }
+
+          $releaseExists = @($releaseList | ConvertFrom-Json | Where-Object { $_.tagName -eq $version }).Count -gt 0
+          if ($releaseExists) {
             gh release upload $version $lightZip $srtZip --clobber
           }
           else {
