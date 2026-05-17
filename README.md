@@ -1,54 +1,154 @@
-# UESTC 入党积极分子快速且深度学习指南
+# 方案三：轻量部署，只自动刷课 + 现成 SRT
 
-基于 Selenium、Chrome DevTools 网络日志、video2md 与 Whisper 的自动观看和自动转写脚本。
+普通 Windows 用户按这个走就够了：脚本自动准备 Selenium，启动一个独立 Chrome，你手动登录学校平台，然后脚本自动刷“入党积极分子”课程。字幕已经整理好，直接打开 `srt/` 就能拿到 131 个 SRT。
 
-这个仓库是一次真实课程资料整理工作的公开发行版：我们用登录后的调试 Chrome 自动进入电子科技大学党员教育培训平台（DXPX），遍历“入党积极分子”课程，嗅探视频媒体地址，调用本地转写工具生成字幕，再把字幕去重、分章、校对明显 ASR 错词后整理成最终 SRT。
+1. 下载或克隆本仓库。
+2. 在仓库目录运行：
 
-本仓库不包含浏览器 Cookie、账号信息、浏览器 profile、运行日志、下载视频、音频缓存、`meta.json` 或个人路径配置。
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\go.ps1
+   ```
 
-## 我们实际做了什么
+3. 弹出 Chrome 后登录：
 
-- 自动观看/遍历：用 Selenium 连接本机调试 Chrome，进入 DXPX 课程页，逐个打开视频页。
-- 媒体发现：通过 Chrome DevTools/performance log 捕获 `.m3u8` / `.mp4` 请求。
-- 转写：把运行时 Cookie、Referer、User-Agent 临时传给 `video2md` / `yt-dlp` / Whisper，生成 `字幕.srt` 和学习笔记。
-- 去重：原始运行中出现过 1 条误嗅探重复项，即长征专题中的 `完成` 被识别到“党的伟大成就”的同一 m3u8；最终版剔除了它。
-- 校对：只修高置信错字和专名术语，例如“明智维新→明治维新”“处级阶段→初级阶段”“中国是现代化→中国式现代化”“张文天→张闻天”“伯古→博古”“王家祥/王驾祥→王稼祥”等。
-- 交付：整理出 131 个 SRT，按 11 个章节归档，字幕序号和时间轴保持原样。
+   ```text
+   https://dxpx.uestc.edu.cn/
+   ```
+
+4. 登录完成后回到 PowerShell 窗口，按提示继续。
+5. 需要字幕就打开：
+
+   ```text
+   srt/
+   ```
+
+轻量版不做新视频转写，不需要安装 Whisper、ffmpeg、yt-dlp 或 video2md。缺 Python 或 Chrome 时，脚本会优先尝试用 `winget` 自动安装；失败时会给出明确提示。
+
+## 三种入口
+
+不装 Git，直接下载 Release：
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/schprosper/uestc-party-activist-selenium-whisper-study-guide/releases/latest/download/dxpx-light-study-srt-v0.2.0.zip" -OutFile ".\dxpx-light-study-srt-v0.2.0.zip"
+Expand-Archive ".\dxpx-light-study-srt-v0.2.0.zip" -DestinationPath ".\dxpx-light-study-srt-v0.2.0" -Force
+cd ".\dxpx-light-study-srt-v0.2.0"
+powershell -ExecutionPolicy Bypass -File .\go.ps1
+```
+
+装了 Git：
+
+```powershell
+git clone https://github.com/schprosper/uestc-party-activist-selenium-whisper-study-guide.git
+cd .\uestc-party-activist-selenium-whisper-study-guide
+powershell -ExecutionPolicy Bypass -File .\go.ps1
+```
+
+双击图形界面：
+
+```text
+开始使用.bat
+```
+
+GUI 会优先读取 `assets/launcher-icon.png` 作为展示图和图标。你可以把那张图裁掉右侧文字后保存成这个文件；没有这个文件时，启动器会绘制一个无文字的深色金色图标。
+
+## 常用命令
+
+默认刷入党积极分子：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\go.ps1
+```
+
+只检查环境：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\go.ps1 -Check
+```
+
+打开字幕目录：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\go.ps1 -OpenSrt
+```
+
+只启动登录浏览器：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\go.ps1 -LoginOnly
+```
+
+刷发展对象课程：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\go.ps1 -Course fzdx
+```
+
+打开高级转写入口提示：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\go.ps1 -AdvancedTranscribe
+```
+
+## 参数解释
+
+`go.ps1` 常用参数：
+
+```powershell
+-Course jjfz          # 默认：入党积极分子
+-Course fzdx          # 发展对象
+-Check                # 只报告 Chrome/Python/.venv/wheels/SRT 状态
+-OpenSrt              # 打开 srt 目录
+-LoginOnly            # 只启动带调试端口的 Chrome
+-AdvancedTranscribe   # 显示完整转写入口和命令
+-Python <python.exe>  # 指定 Python
+-NoInstall            # 缺 Python/Chrome 时不尝试 winget 安装
+-ForceVenv            # 重建 .venv
+```
+
+## 不懂就复制给国产模型
+
+```text
+我在 Windows 上要运行这个仓库：
+https://github.com/schprosper/uestc-party-activist-selenium-whisper-study-guide
+
+目标：只自动刷电子科技大学党员教育培训平台的入党积极分子课程，并打开现成 SRT 字幕；不要让我配置 Whisper、ffmpeg、yt-dlp、video2md。
+
+请根据我的电脑情况解释或改写这些命令：
+1. powershell -ExecutionPolicy Bypass -File .\go.ps1 -Check
+2. powershell -ExecutionPolicy Bypass -File .\go.ps1
+3. powershell -ExecutionPolicy Bypass -File .\go.ps1 -OpenSrt
+
+如果报错，请先判断是 Chrome、Python、PowerShell 执行策略、学校网页登录、还是网络问题。
+```
 
 ## 仓库内容
 
 ```text
 .
   README.md
-  setup.ps1                    # 基础一键部署：创建 .venv 并安装 Python 依赖
-  config.example.ps1           # 本机工具路径配置模板
+  go.ps1                       # 默认轻量入口
+  开始使用.bat                 # 双击 GUI
+  setup.ps1                    # 基础 Python 依赖安装，兼容高级方案
+  config.example.ps1           # 高级转写本机工具路径模板
   scripts/
+    simple_launcher.ps1        # WinForms 图形启动器
+    run_light_study.ps1        # 轻量刷课封装，只播放不转写
     launch_chrome_debug.ps1    # 启动独立调试 Chrome
-    run_dxpx_md_transcribe.ps1 # 推荐入口：嗅探并逐个转写
-    dxpx_md_transcriber.py     # 页面遍历、断点续跑、调用转写
-    dxpx_transcribe.ps1        # 单个 m3u8 调用 video2md 转写整理
-    whisper_cpp_cublas_adapter.ps1
-    run_jjfz.ps1 / jjfz.py     # 旧入口：自动播放积极分子课程
-    run_fzdx.ps1 / fzdx.py     # 旧入口：自动播放发展对象课程
-  srt/                         # 已校对的入党积极分子最终 SRT
+    run_jjfz.ps1 / jjfz.py     # 入党积极分子自动播放
+    run_fzdx.ps1 / fzdx.py     # 发展对象自动播放
+    run_dxpx_md_transcribe.ps1 # 高级完整转写入口
+    dxpx_md_transcriber.py
+    dxpx_transcribe.ps1 / dxpx_transcribe.py
+  vendor/wheels/               # Selenium 及 Python 依赖 wheel 缓存
+  srt/                         # 已整理的入党积极分子最终 SRT
   docs/
 ```
 
-## 合规和风险说明
-
-这个项目只做技术学习和个人学习资料整理。课程平台账号、课程内容、学校规则、版权和使用责任由使用者自行确认。
-
-脚本会在运行时读取当前调试 Chrome 的登录态 Cookie，并把它作为命令参数传给本地转写/下载工具；Cookie 不会被写入仓库，但在脚本运行期间可能出现在本机进程命令行里。因此不要共享运行中的机器、不要提交 `chrome-profile`、`.tmp`、`output`、日志或 `config.local.ps1`。
+本仓库不包含 Chrome 安装包、Python 安装包、Whisper 模型、ffmpeg、yt-dlp、video2md、浏览器 Cookie、账号信息、浏览器 profile、运行日志、下载视频或音频缓存。
 
 ## 已整理字幕
 
-最终字幕在：
-
-```text
-srt/
-```
-
-数量：
+最终字幕在 `srt/`，合计 131 个 `.srt`：
 
 ```text
 第1章_党的伟大成就                         50
@@ -64,98 +164,43 @@ srt/
 第11章_二十大党章公开课                     10
 ```
 
-合计 131 个 `.srt`。
+## 高级方案：完整转写
 
-## 部署方案一：推荐的 Codex/Windows 部署法
+完整转写保留给已经有本地工具链的人。它需要 video2md、ffmpeg、yt-dlp、Whisper 或 whisper.cpp。
 
-适合已经有本地转写工具链的人。`setup.ps1` 会安装 Selenium 依赖，但不会替你安装需要手动准备的 Whisper 模型、ffmpeg 或 video2md。
-
-1. 克隆仓库并进入目录。
-
-   ```powershell
-   git clone <你的仓库地址>
-   cd .\UESTC入党积极分子快速且深度学习指南——基于Selenium与Whisper的自动观看和自动转写脚本
-   ```
-
-2. 基础一键部署。
+1. 准备 Python 3.10+、Google Chrome、ffmpeg、yt-dlp、Whisper/video2md。
+2. 初始化依赖：
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\setup.ps1
    ```
 
-3. 编辑本机配置。
-
-   `setup.ps1` 会自动生成 `config.local.ps1`。把里面的路径改成你本机实际路径：
+3. 复制并编辑本机配置：
 
    ```powershell
-   $env:VIDEO2MD_SCRIPT = "D:\path\to\video2md\video2md.ps1"
-   $env:YTDLP_PATH = "D:\path\to\yt-dlp.exe"
-   $env:FFMPEG_PATH = "D:\path\to\ffmpeg.exe"
-   $env:WHISPER_CPP_ROOT = "D:\path\to\Whisper\Cpp"
-   $env:WHISPER_CPP_CUBLAS_ROOT = "D:\path\to\Whisper\CppCuBlas"
+   Copy-Item .\config.example.ps1 .\config.local.ps1
+   notepad .\config.local.ps1
    ```
 
-4. 启动独立调试 Chrome。
+4. 启动登录浏览器：
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\launch_chrome_debug.ps1
    ```
 
-5. 在弹出的 Chrome 中登录：
-
-   ```text
-   https://dxpx.uestc.edu.cn/
-   ```
-
-6. 先只跑 1 个视频验证链路。
+5. 先验证 1 个视频：
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\run_dxpx_md_transcribe.ps1 -MaxVideos 1
    ```
 
-7. 跑积极分子全量。
+6. 跑积极分子全量：
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\run_dxpx_md_transcribe.ps1
    ```
 
-默认输出在：
-
-```text
-output\dxpx_notes
-```
-
-默认临时目录在：
-
-```text
-.tmp\dxpx_md_auto_transcribe
-```
-
-不加 `-KeepWork` 时，临时视频、音频和中间文件会自动清理。
-
-## 部署方案二：手动部署法
-
-1. 安装 Python 3.10+、Google Chrome、ffmpeg、yt-dlp、Whisper 或 whisper.cpp。
-2. 准备可用的 `video2md.ps1`，确认它能把一个普通 m3u8 转成 SRT。
-3. 创建虚拟环境并安装依赖：
-
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\python.exe -m pip install --upgrade pip
-   .\.venv\Scripts\python.exe -m pip install -r .\scripts\requirements.txt
-   ```
-
-4. 复制配置模板：
-
-   ```powershell
-   Copy-Item .\config.example.ps1 .\config.local.ps1
-   ```
-
-5. 编辑 `config.local.ps1` 后，按“部署方案一”的第 4 步继续。
-
-## 推荐入口参数
-
-`scripts\run_dxpx_md_transcribe.ps1` 的常用参数：
+高级入口常用参数：
 
 ```powershell
 -Course jjfz          # jjfz 积极分子，fzdx 发展对象，both 两个都跑
@@ -166,65 +211,41 @@ output\dxpx_notes
 -KeepWork             # 保留临时下载/音频，只建议排查时使用
 -SniffTimeout 20      # 网络慢时调大
 -TriggerWait 4        # 播放器加载慢时调大
--NoRefreshOnMiss      # 嗅探不到媒体时不自动刷新/重进页面
 ```
 
-示例：
+## 大文件和发布
 
-```powershell
-# 只验证 1 个视频
-powershell -ExecutionPolicy Bypass -File .\scripts\run_dxpx_md_transcribe.ps1 -MaxVideos 1
+半离线包只把 Selenium wheels 放进仓库。Chrome、Python 安装包、Whisper 模型、ffmpeg、yt-dlp、video2md 都不放进 Git history。
 
-# 网络慢时增加等待
-powershell -ExecutionPolicy Bypass -File .\scripts\run_dxpx_md_transcribe.ps1 -MaxVideos 1 -SniffTimeout 20 -TriggerWait 4
+GitHub 普通仓库对大文件有限制：超过 50 MiB 会警告，超过 100 MiB 会阻止推送；需要分发较大二进制时应使用 Release 资产或 Git LFS。参考 GitHub Docs: https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github
 
-# 发展对象课程
-powershell -ExecutionPolicy Bypass -File .\scripts\run_dxpx_md_transcribe.ps1 -Course fzdx
+计划发布资产：
+
+```text
+dxpx-light-study-srt-v0.2.0.zip  # 轻量刷课 + GUI + SRT + wheels
+srt-only-v0.2.0.zip              # 只含最终字幕
 ```
-
-## 旧入口：自动播放并后台转写
-
-如果你更想模拟“逐个视频播放”的流程，可以先启动调试 Chrome 并登录，然后运行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_jjfz.ps1
-powershell -ExecutionPolicy Bypass -File .\scripts\run_fzdx.ps1
-```
-
-只播放、不转写：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_jjfz.ps1 -NoTranscribe
-powershell -ExecutionPolicy Bypass -File .\scripts\run_fzdx.ps1 -NoTranscribe
-```
-
-推荐优先使用 `run_dxpx_md_transcribe.ps1`，因为它的断点续跑、失败补转和输出整理更完整。
-
-## 断点续跑逻辑
-
-推荐入口会读取本轮输出目录下的 `logs\manifest.jsonl`，并核对每个视频目录里的 `meta.json` 与成品文件。已经完成且文件仍存在的条目会在点击视频和嗅探前跳过；失败项、缺成品项或加了 `-Force` 的条目会重新转写。
 
 ## 隐私清理清单
 
-公开发布前请确认：
+公开发布前确认：
 
 ```powershell
 git status --ignored --short
 ```
 
-不要提交这些内容：
+不要提交：
 
 - `chrome-profile/`、`chrome-transcribe-profile*/`、任何浏览器用户数据目录。
 - `config.local.ps1`。
-- `.tmp/`、`output/`、`logs/`。
+- `.venv/`、`.tmp/`、`output/`、`logs/`。
 - `manifest.jsonl`、`meta.json`、`transcribe.log`、`failed_tasks.log`。
 - 下载视频、音频、Whisper 中间 JSON/TXT、截图。
 
-本仓库的 `.gitignore` 已默认排除这些文件，只保留 `srt/**/*.srt` 作为最终字幕。
+本仓库的 `.gitignore` 默认排除这些内容，只保留 `srt/**/*.srt` 作为最终字幕。
 
-## 诚实限制
+## 合规和限制
 
-- 这个项目不是平台官方工具。
-- 完整“一键部署”无法覆盖人工登录、学校账号权限、Whisper 模型下载和 video2md 安装。
-- ASR 校对是保守校对，不是人工逐字精校。我们只修了高置信错字、专名、标题和明显术语错误，没有润色或改写课程内容。
-- DXPX 页面结构如果更新，Selenium 选择器可能需要维护。
+这个项目不是平台官方工具。自动刷课仍然需要你手动登录学校平台，脚本不会保存账号密码。课程平台账号、课程内容、学校规则、版权和使用责任由使用者自行确认。
+
+DXPX 页面结构如果更新，Selenium 选择器可能需要维护。现成 SRT 是保守校对，不是逐字精校；我们只修了高置信错字、专名、标题和明显术语错误，没有润色或改写课程内容。

@@ -9,6 +9,7 @@ $repoRoot = $PSScriptRoot
 $venvDir = Join-Path $repoRoot ".venv"
 $pythonInVenv = Join-Path $venvDir "Scripts\python.exe"
 $requirements = Join-Path $repoRoot "scripts\requirements.txt"
+$wheelDir = Join-Path $repoRoot "vendor\wheels"
 
 if ((Test-Path -LiteralPath $pythonInVenv) -and -not $Force) {
     Write-Host "Using existing virtual environment: $venvDir"
@@ -23,8 +24,21 @@ if (-not (Test-Path -LiteralPath $pythonInVenv)) {
 }
 
 Write-Host "Installing Python dependencies..."
-& $pythonInVenv -m pip install --upgrade pip
-& $pythonInVenv -m pip install -r $requirements
+$wheelCount = 0
+if (Test-Path -LiteralPath $wheelDir) {
+    $wheelCount = @(Get-ChildItem -LiteralPath $wheelDir -Filter *.whl -File -ErrorAction SilentlyContinue).Count
+}
+if ($wheelCount -gt 0) {
+    & $pythonInVenv -m pip install --no-index --find-links $wheelDir -r $requirements
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Offline wheel install failed. Falling back to online pip install."
+        & $pythonInVenv -m pip install -r $requirements
+    }
+}
+else {
+    & $pythonInVenv -m pip install -r $requirements
+}
+if ($LASTEXITCODE -ne 0) { throw "Python dependency install failed." }
 
 $config = Join-Path $repoRoot "config.local.ps1"
 $configExample = Join-Path $repoRoot "config.example.ps1"

@@ -1,7 +1,7 @@
 param(
     [string]$Url = "https://dxpx.uestc.edu.cn/",
     [int]$Port = 9222,
-    [string]$ProfileDir = (Join-Path $PSScriptRoot "chrome-profile")
+    [string]$ProfileDir = (Join-Path (Split-Path -Parent $PSScriptRoot) "chrome-profile")
 )
 
 $ErrorActionPreference = "Stop"

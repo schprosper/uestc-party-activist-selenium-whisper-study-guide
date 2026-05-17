@@ -4,6 +4,8 @@
 output/
 logs/
 debug/
+dist/
+release/
 
 # Browser profiles contain login cookies and must never be published.
 chrome-profile/
@@ -51,3 +53,12 @@ meta.json
 *.jpeg
 *.gif
 *.webp
+
+# Optional launcher image requested by the GUI workflow.
+!assets/
+!assets/README.md
+!assets/launcher-icon.png
+!assets/launcher-icon.jpg
+!assets/launcher-icon.jpeg
+!assets/launcher-icon.bmp
+!assets/launcher-icon.ico
