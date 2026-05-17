@@ -28,23 +28,15 @@ jobs:
             throw "Expected 131 SRT files, found $srtCount."
           }
 
-          $lightPaths = @(
-            ".gitattributes",
-            ".gitignore",
-            "README.md",
-            "go.ps1",
-            "开始使用.bat",
-            "setup.ps1",
-            "config.example.ps1",
-            "scripts",
-            "vendor",
-            "srt",
-            "assets",
-            "docs"
-          )
+          git archive --format=zip --output=$lightZip HEAD -- .gitattributes .gitignore README.md go.ps1 "开始使用.bat" setup.ps1 config.example.ps1 scripts vendor srt assets docs
+          if ($LASTEXITCODE -ne 0) {
+            throw "git archive failed for $lightZip."
+          }
 
-          Compress-Archive -Path $lightPaths -DestinationPath $lightZip -Force
-          Compress-Archive -Path ".\srt" -DestinationPath $srtZip -Force
+          git archive --format=zip --output=$srtZip HEAD -- srt
+          if ($LASTEXITCODE -ne 0) {
+            throw "git archive failed for $srtZip."
+          }
 
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           foreach ($zipPath in @($lightZip, $srtZip)) {
