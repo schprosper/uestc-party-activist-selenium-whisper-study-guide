@@ -1,64 +1,25 @@
-# Local runtime state
-.venv/
+﻿.venv/
+.local/
 .tmp/
-output/
-logs/
-debug/
+.build/
+.build-env/
 dist/
 release/
-
-# Browser profiles contain login cookies and must never be published.
-chrome-profile/
-chrome-download-profile/
-chrome-transcribe-profile*/
-**/Default/
-**/Cookies
-**/Network/
-
-# Local configuration may contain private paths.
-config.local.ps1
-
-# Python
+audit/
 __pycache__/
 *.py[cod]
-
-# Logs and runtime manifests
+*.spec
+*.zip
+*.exe
+*.dll
+*.whl
 *.log
-manifest.jsonl
-failed_tasks.log
-transcribe.log
-meta.json
-笔记.md
-
-# Media and intermediate transcription outputs
-*.mp4
-*.mkv
-*.webm
-*.wav
-*.m4a
-*.mp3
-*.ass
-*.vtt
-*.json
-*.txt
-!scripts/requirements.txt
-
-# Keep the curated final subtitles in this repository.
-*.srt
-!srt/**/*.srt
-
-# Screenshots/debug artifacts
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-
-# Optional launcher image requested by the GUI workflow.
-!assets/
-!assets/README.md
-!assets/launcher-icon.png
-!assets/launcher-icon.jpg
-!assets/launcher-icon.jpeg
-!assets/launcher-icon.bmp
-!assets/launcher-icon.ico
+*.jsonl
+*.sqlite*
+*.db
+cookies*.json
+chrome-profile/
+browser/
+**/Default/
+**/Network/
+config.local.*
