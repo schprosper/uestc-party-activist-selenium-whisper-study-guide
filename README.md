@@ -1,8 +1,43 @@
-﻿# UESTC 党校助手 · V1.2
+# DXPX Helper · Windows 浏览器任务助手
 
-积极分子、发展对象两个一键入口，Windows 10/11 64 位免安装版。
+面向 UESTC 党校培训页面的 Python 桌面工具，整合浏览器会话、任务执行、故障恢复与平台状态复核，支持积极分子和发展对象两类流程。
 
-**[下载最新版 Windows 程序](https://github.com/schprosper/uestc-party-activist-selenium-whisper-study-guide/releases/latest/download/DXPX_Helper_Windows_x64.zip)**
+**Python 3.11 · Tkinter · Chrome DevTools Protocol · requests · unittest · PyInstaller**
+
+[Architecture / 架构](docs/ARCHITECTURE.md) · [Demo & Development / 演示与开发](docs/DEVELOPMENT.md) · [Engineering case study](docs/CASE_STUDY.md) · [来源与贡献](ATTRIBUTION.md)
+
+> 当前应用及 Windows Release 仍为 **V1.2**；本次为仓库展示、离线演示与 CI 整理，不是新程序发布。仓库沿用历史名称，当前主线不依赖 Selenium，也不包含 Whisper 转写。
+
+## 工程设计
+
+页面变化、播放器暂停和网络故障会导致任务中断；播放器结束或请求受理，也不等于平台已记录完成。本项目分别处理页面操作、有限恢复与结果确认，并在失败时保留浏览器供用户接管。
+
+| 设计 | 实现与价值 | 代码入口 |
+| --- | --- | --- |
+| 会话接入 | 专用 Chrome/Edge、动态端口、两类资料隔离，免维护 WebDriver | [`ensure_browser` / `CDP`](src/core.py) |
+| 任务生命周期 | 工作线程与 UI 队列、协作取消、类别级 Windows 互斥锁 | [`App`](src/app.py) |
+| 有限恢复 | 停滞 10 秒尝试恢复，每资源最多刷新两次，超限停止 | [`StallGuard`](src/playback.py) |
+| 结果复核 | 区分动作完成和平台正式状态，跳过已有完成记录 | [`Client`](src/core.py)、[`run_playback`](src/playback.py) |
+| 确定性匹配 | 根据完整内容映射当前选项 ID，冲突或歧义不猜测 | [`resolve`](src/core.py) |
+| 可分发与排查 | Windows 目录式程序、本机 JSONL 日志和反馈 | [`build.py`](build.py)、[`App.feedback`](src/app.py) |
+
+## 无账号离线演示
+
+在仓库根目录运行，不打开浏览器、不连接学校平台：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe examples\offline_demo.py
+```
+
+预期输出四个 `PASS`：有限恢复、选项重排、完成任务跳过、拒绝将请求受理当作正式完成。演示直接调用业务函数，使用合成数据并拦截外部 I/O。
+
+现有 **17 项 unittest** 覆盖请求边界、资源身份、匹配歧义、取消、状态一致性、GUI 分派和恢复预算。测试数不等于代码覆盖率或线上兼容率；运行方式见[开发说明](docs/DEVELOPMENT.md)。
+
+## English overview
+
+A Windows desktop automation tool for a specific training website. The engineering focus is bounded recovery, explicit outcome verification, cancellable background work and reproducible offline checks. It uses CDP and Python; it is **not embedded firmware or an RTOS implementation**. See the [English case study](docs/CASE_STUDY.md) for implementation evidence and limitations.
 
 ## 开始使用
 
@@ -49,3 +84,12 @@ python -m venv .venv
 产物位于 `dist/DXPX_Helper/`。运行环境、浏览器资料、日志、临时文件和安装包不进入 Git。
 
 题库与项目参考：[MonarchMan/UESTC_dxpx](https://github.com/MonarchMan/UESTC_dxpx)。
+
+
+## 来源与项目边界
+
+本项目不是学校官方客户端。发展对象默认仍包含直接记录提交，不能把整个应用描述为只读工具或仅正常播放；直接记录也不等于正常观看。实际使用需符合平台要求。
+
+题库 5,280 条是上游源记录数，不是原创题目数、唯一题数或准确率。代码及文档使用 AI 编程工具辅助实现，来源与贡献边界见 [ATTRIBUTION.md](ATTRIBUTION.md)。
+
+`src/app.py` 管理界面与任务，`src/core.py` 管理连接、页面和业务判断，`src/playback.py` 管理播放恢复；`examples/`、`tests/` 和 `docs/` 分别提供演示、验证及设计说明。已知局限见[架构文档](docs/ARCHITECTURE.md)。
